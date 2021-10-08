@@ -1,0 +1,21 @@
+Package: ConnectAnalystR
+Title: R Functions for NCI/DCEG Connect Analysts
+Version: 0.0.1.0
+Authors@R: 
+    person(given = "Russ",
+           family = "Daniel",
+           role = c("aut", "cre"),
+           email = "daniel.russ@nih.gov",
+           comment = c(ORCID = "0000-0003-4040-4416"))
+Description: This packages provides a set of functions that a DCEG connect
+    analyst might find useful.  
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Imports: 
+    googleCloudRunner,
+    httr,
+    jsonlite,
+    stringr

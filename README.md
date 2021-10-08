@@ -7,6 +7,6 @@ install.packages('devtools')
 ```
 then 
 ```
-devtools::install_github("Analyticsphere/CloudRun_QAQC")
+devtools::install_github("Analyticsphere/ConnectAnalystR")
 
 ```

@@ -1,6 +1,6 @@
 Package: ConnectAnalystR
 Title: R Functions for NCI/DCEG Connect Analysts
-Version: 0.0.1.0
+Version: 0.0.2
 Authors@R: 
     person(given = "Russ",
            family = "Daniel",
@@ -16,6 +16,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
 Imports: 
     googleCloudRunner,
+    bigrquery,
     httr,
     jsonlite,
     stringr

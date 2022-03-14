@@ -20,4 +20,9 @@ Imports:
     bigrquery,
     httr,
     jsonlite,
-    stringr
+    rlang,
+    stringr,
+    tidyr,
+    dplyr,
+    ggplot2,
+    magrittr

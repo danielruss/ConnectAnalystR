@@ -49,8 +49,6 @@ or d_118061122 is not null or d_279637054 is not null) " )
 makeOccupationBarChart <- function(occData){
   data <- occData %>% tidyr::pivot_longer( 2:5,names_to=c("set",".value"),names_sep = 7 ) %>%
     dplyr::filter(!is.na(JobTitle) &!is.na(Selection))
-  print(data)
-  print(attr(occData,"date"))
   data %>% dplyr::mutate(InTop4=Selection!="NONE_OF_THE_ABOVE") %>% ggplot2::ggplot(ggplot2::aes(x=InTop4)) + ggplot2::geom_bar()+
     ggplot2::geom_text(stat='count', ggplot2::aes(label=paste0(..count..," (",round( ..count../sum(..count..)*100,1),"%)")),
               vjust=-1) +

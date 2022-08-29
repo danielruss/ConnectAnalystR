@@ -16,7 +16,7 @@ getOccupationData(project, connectEnv = c("dev", "stage", "prod"))
 }}
 }
 \value{
-
+tibble with data.
 }
 \description{
 Calls the BQ API.  The user will have to go through the OAuth dance.  To make sure you

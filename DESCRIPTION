@@ -1,6 +1,6 @@
 Package: ConnectAnalystR
 Title: R Functions for NCI/DCEG Connect Analysts
-Version: 0.0.2
+Version: 0.0.3
 Authors@R: 
     person(given = "Russ",
            family = "Daniel",

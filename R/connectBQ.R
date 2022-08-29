@@ -102,7 +102,8 @@ makeDetailedOccupationBarChart<-function(pivottedData,...){
 #' @param ... Parameters passed to getOccupationData(), must include both and project,connectEnv
 #'
 #'
-#' @return
+#' @return ggplot object of barplot ready for displaying or saving with ggsave.
+#'
 #' @export
 #'
 makeOccupationBarChart <- function(occData){

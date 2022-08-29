@@ -17,7 +17,7 @@ makeOccupationBarChart(occData)
 \item{occData}{The occupational data returned from  \code{\link{getOccupationData}}.}
 }
 \value{
-
+ggplot object of barplot ready for displaying or saving with ggsave.
 }
 \description{
 Makes a bar chart that from the Occupational Data in Connect.

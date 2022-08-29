@@ -68,6 +68,7 @@ pivotOccupationData<-function(data,...){
 
 
 #' @rdname  makeOccupationBarChart
+#' @export
 makeDetailedOccupationBarChart<-function(pivottedData,...){
   if (missing(pivottedData)){
     pivottedData <- pivotOccupationData(...)

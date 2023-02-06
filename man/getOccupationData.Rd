@@ -4,14 +4,14 @@
 \alias{getOccupationData}
 \title{Get Occupation data from the Connect Data.}
 \usage{
-getOccupationData(project, connectEnv = c("dev", "stage", "prod"))
+getOccupationData(project = preferences$project, env = preferences$env)
 }
 \arguments{
 \item{project}{\itemize{
 \item The project which is billed for the BQ processing.
 }}
 
-\item{connectEnv}{\itemize{
+\item{env}{\itemize{
 \item Either  "dev", "stage", or "prod"
 }}
 }

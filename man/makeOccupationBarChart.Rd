@@ -12,7 +12,7 @@ makeOccupationBarChart(occData)
 \arguments{
 \item{pivottedData}{Occupational data returned from \code{\link{pivotOccupationData}}.}
 
-\item{...}{Parameters passed to getOccupationData(), must include both and project,connectEnv}
+\item{...}{Parameters passed to getOccupationData(), must include both and project,env}
 
 \item{occData}{The occupational data returned from  \code{\link{getOccupationData}}.}
 }

@@ -1,6 +1,6 @@
 Package: ConnectAnalystR
 Title: R Functions for NCI/DCEG Connect Analysts
-Version: 0.0.3
+Version: 0.0.4
 Authors@R: 
     person(given = "Russ",
            family = "Daniel",
@@ -13,7 +13,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 Imports: 
     gargle,
     googleCloudRunner,
@@ -25,4 +25,5 @@ Imports:
     tidyr,
     dplyr,
     ggplot2,
+    tools,
     magrittr

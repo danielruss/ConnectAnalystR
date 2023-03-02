@@ -7,7 +7,8 @@ connect_bigquery_info <- list(
     module1 = "`nih-nci-dceg-connect-stg-5519.flat.flatmodule1_scheduledqueries`"
     ),
   prod =list(
-    module1 = "`nih-nci-dceg-connect-prod-6d04.flat.module1_scheduledqueries`")
+    module1_v1 = "`nih-nci-dceg-connect-prod-6d04.Connect.module1_v1`",
+    module1_v2 = "`nih-nci-dceg-connect-prod-6d04.Connect.module1_v2`")
 )
 
 #' Get Occupation data from the Connect Data.
@@ -24,12 +25,21 @@ connect_bigquery_info <- list(
 getOccupationData <- function(project=preferences$project,env=preferences$env){
   if (is.null(project)) stop('project must be defined')
   if (is.null(env) || !env %in% c("dev","stage","prod")) stop('env must one of "dev", "stage", or "prod"')
-  query = paste0("SELECT DISTINCT Connect_ID,d_627122657,d_761310265,d_118061122,d_279637054 FROM ",
-                 connect_bigquery_info[[env]]$module1," where Connect_ID is not null AND (d_627122657 is Not null or d_761310265 is not null
-or d_118061122 is not null or d_279637054 is not null) " )
 
-  tb <- bigrquery::bq_project_query(project,query)
-  data <- bigrquery::bq_table_download(tb,bigint = "integer64")
+  ### need to convert this to a list of queries...
+  v1_query = paste0("SELECT DISTINCT Connect_ID,d_627122657,d_761310265,d_118061122,d_279637054 FROM ",
+                 connect_bigquery_info[[env]]$module1_v1," where Connect_ID is not null AND (d_627122657 is Not null or d_761310265 is not null or d_118061122 is not null or d_279637054 is not null) " )
+  v2_query = paste0("SELECT DISTINCT Connect_ID,d_627122657,d_761310265,d_118061122,d_279637054 FROM ",
+                    connect_bigquery_info[[env]]$module1_v2," where Connect_ID is not null AND (d_627122657 is Not null or d_761310265 is not null or d_118061122 is not null or d_279637054 is not null) " )
+
+  tb1 <- bigrquery::bq_project_query(project,v1_query)
+  tb2 <- bigrquery::bq_project_query(project,v2_query)
+
+  data <- dplyr::bind_rows(
+    bigrquery::bq_table_download(tb1,bigint = "integer64"),
+    bigrquery::bq_table_download(tb2,bigint = "integer64")
+  )
+
   colnames(data) <- c("Connect Id","CurrentJobTitle","CurrentSelection",
                       "LongestJobTitle","LongestSelection")
   attr(data,"date") <- format(Sys.time(),"%a %b %d %Y %I:%M %p")

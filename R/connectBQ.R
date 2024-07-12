@@ -255,8 +255,8 @@ getIndustryData <- function(project=preferences$project,env=preferences$env){
                               "{LongestIndustryOther} as LongestIndustryOther from {tbl_v2} ",
                               "where Connect_ID is not null AND ",
                               "ARRAY_LENGTH({CurrentIndustry}) + ARRAY_LENGTH({LongestIndustry}) > 0")
-  v2_tbl <- bigrquery::bq_project_query(project,v1_query)
-  v2_data <- bigrquery::bq_table_download(v1_tbl,bigint = "integer64")
+  v2_tbl <- bigrquery::bq_project_query(project,v2_query)
+  v2_data <- bigrquery::bq_table_download(v2_tbl,bigint = "integer64")
 
 
   dplyr::bind_rows(v1_data,v2_data) |>

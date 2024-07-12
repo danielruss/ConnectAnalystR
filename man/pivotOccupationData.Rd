@@ -10,7 +10,7 @@ pivotOccupationData(data, ...)
 \item{data}{Occupational data from getOccupationData}
 
 \item{...}{alternatively, pass in the variables for getOccupationalData and this function
-will call getOccupationalData and pivot in one step}
+will call getOccupationalData and pivot in one step (project and env)}
 }
 \value{
 a tibble with Connect Id, longest/Current job, JobTitle, Selection, and rank (1-4,5+)

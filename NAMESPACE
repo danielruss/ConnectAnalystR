@@ -3,6 +3,7 @@
 export("%>%")
 export(checkSavedAccessToken)
 export(cloud_run_qaqc)
+export(getIndustryData)
 export(getOccupationData)
 export(makeDetailedOccupationBarChart)
 export(makeOccupationBarChart)

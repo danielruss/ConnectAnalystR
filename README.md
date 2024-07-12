@@ -7,7 +7,7 @@ install.packages('devtools')
 ```
 then 
 ```
-devtools::install_github("Analyticsphere/ConnectAnalystR")
+devtools::install_github("danielruss/ConnectAnalystR")
 
 ```
 

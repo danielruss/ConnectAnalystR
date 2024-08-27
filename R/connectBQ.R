@@ -1,15 +1,19 @@
 
 connect_bigquery_info <- list(
   dev = list(
-    module1_v2 = "`nih-nci-dceg-connect-dev.Connect.module1_v2`"
+    module1_v2  = "`nih-nci-dceg-connect-dev.Connect.module1_v2`",
+    participant = "`nih-nci-dceg-connect-stg-5519.Connect.participants`"
       ),
   stage = list(
-    module1_v1 = "`nih-nci-dceg-connect-stg-5519.Connect.module1_v1`",
-    module1_v2 = "`nih-nci-dceg-connect-stg-5519.Connect.module1_v2`"
+    module1_v1  = "`nih-nci-dceg-connect-stg-5519.Connect.module1_v1`",
+    module1_v2  = "`nih-nci-dceg-connect-stg-5519.Connect.module1_v2`",
+    participant = "`nih-nci-dceg-connect-stg-5519.Connect.participants`"
     ),
   prod =list(
-    module1_v1 = "`nih-nci-dceg-connect-prod-6d04.Connect.module1_v1`",
-    module1_v2 = "`nih-nci-dceg-connect-prod-6d04.Connect.module1_v2`")
+    module1_v1  = "`nih-nci-dceg-connect-prod-6d04.Connect.module1_v1`",
+    module1_v2  = "`nih-nci-dceg-connect-prod-6d04.Connect.module1_v2`",
+    participant = "`nih-nci-dceg-connect-prod-6d04.Connect.participants`"
+    )
 )
 
 # make a small data dictionary that maps to concept ids needed by this function
@@ -43,7 +47,9 @@ cid <- list(
   "596792238"="Service Provider",
   "620577362"="Farming",
   "751475124"="Military",
-  "178420302"="Don't Know"
+  "178420302"="Don't Know",
+  ## This is in the participants table
+  "module1_submit_time"="d_517311251"
 )
 
 
@@ -63,25 +69,22 @@ getOccupationData <- function(project=preferences$project,env=preferences$env){
   if (is.null(project)) stop('project must be defined')
   if (is.null(env) || !env %in% c("dev","stage","prod")) stop('env must one of "dev", "stage", or "prod"')
 
+  v1_data <- get_v1_with_date(project,env)
+  v2_data <- get_v2_with_date(project,env)
+  data <- dplyr::bind_rows(
+    v1_data,
+    v2_data
+  )
 
+  attr(data,"date") <- format(Sys.time(),"%a %b %d %Y %I:%M %p")
+  data
+}
+
+get_v1_with_date <- function(project,env){
   ## the dev data from module 1 is empty
   ## so just return an empty tibble if you are looking
   ## at the dev data.
-  if (env != "dev"){
-    tbl_v1 <- connect_bigquery_info[[env]]$module1_v1
-    v1_query <- glue::glue_data(cid,"select {Connect_ID},",
-                                "{CurrentJobTitle} as CurrentJobTitle, ",
-                                "{CurrentSelection} as CurrentSelection,",
-                                "{LongestJobTitle} as LongestJobTitle,",
-                                "{LongestSelection} as LongestSelection from {tbl_v1} ",
-                                "where Connect_ID is not null AND not",
-                                "({CurrentJobTitle} is null and {CurrentSelection} is null and ",
-                                "{LongestJobTitle} is null and {LongestSelection} is null)")
-    v1_tbl <- bigrquery::bq_project_query(project,v1_query)
-    v1_data <- bigrquery::bq_table_download(v1_tbl,bigint = "integer64") |>
-      dplyr::mutate(CurrentJobTask = NA_character_,
-             LongestJobTask = NA_character_)
-  } else {
+  if (env=="dev"){
     v1_data <- tibble::tibble(
       Connect_ID = bit64::integer64(),
       CurrentJobTitle = character(),
@@ -90,34 +93,58 @@ getOccupationData <- function(project=preferences$project,env=preferences$env){
       LongestJobTitle = character(),
       LongestJobTask = character(),
       LongestSelection = character(),
+      version = character(),
     )
+    return(v1_data)
   }
 
-  # get the data from version two of module1
+  tbl_v1 <- connect_bigquery_info[[env]]$module1_v1
+  v1_query <- glue::glue_data(cid,"select {Connect_ID},",
+                              "{CurrentJobTitle} as CurrentJobTitle, ",
+                              "{CurrentSelection} as CurrentSelection,",
+                              "{LongestJobTitle} as LongestJobTitle,",
+                              "{LongestSelection} as LongestSelection from {tbl_v1} ",
+                              "where Connect_ID is not null AND not",
+                              "({CurrentJobTitle} is null and {CurrentSelection} is null and ",
+                              "{LongestJobTitle} is null and {LongestSelection} is null)")
+  v1_tbl <- bigrquery::bq_project_query(project,v1_query)
+  v1_data <- bigrquery::bq_table_download(v1_tbl,bigint = "integer64") |>
+    dplyr::mutate(CurrentJobTask = NA_character_,
+                  LongestJobTask = NA_character_)
+  v1_data$version="v1";
+
+  v1_data
+
+}
+
+get_v2_with_date <- function(project,env){
   tbl_v2 <- connect_bigquery_info[[env]]$module1_v2
-  v2_query <- glue::glue_data(cid,
-                      "select {Connect_ID},",
-                      "{CurrentJobTitle} as CurrentJobTitle, ",
-                      "{CurrentJobTask} as CurrentJobTask, ",
-                      "{CurrentSelection} as CurrentSelection, ",
-                      "{LongestJobTitle} as LongestJobTitle, ",
-                      "{LongestJobTask} as LongestJobTask, ",
-                      "{LongestSelection} as LongestSelection from {tbl_v2} " ,
-                      "where Connect_ID is not null AND not",
-                      "({CurrentJobTitle} is null and {CurrentSelection} is null and ",
-                      "{LongestJobTitle} is null and {LongestSelection} is null and ",
-                      "{CurrentJobTask} is null and {LongestJobTask} is null)")
+  tbl_participant <- connect_bigquery_info[[env]]$participant
+  v2_query <-  glue::glue_data(
+    cid,
+    "SELECT ",
+    "module1.{Connect_ID}, ",
+    "module1.{CurrentJobTitle} as CurrentJobTitle, ",
+    "module1.{CurrentJobTask} as CurrentJobTask, ",
+    "module1.{CurrentSelection} as CurrentSelection, ",
+    "module1.{LongestJobTitle} as LongestJobTitle, ",
+    "module1.{LongestJobTask} as LongestJobTask, ",
+    "module1.{LongestSelection} as LongestSelection, ",
+    "participant.{module1_submit_time} as submit_time ",
+    "from {tbl_v2} as module1 ",
+    "LEFT JOIN {tbl_participant} AS participant ",
+    "ON module1.{Connect_ID} = participant.{Connect_ID} ",
+    "WHERE module1.{Connect_ID} is not null AND not ",
+    "(module1.{CurrentJobTitle} is null and module1.{CurrentSelection} is null and ",
+    "module1.{LongestJobTitle} is null and module1.{LongestSelection} is null and ",
+    "module1.{CurrentJobTask} is null and module1.{LongestJobTask} is null)"
+  )
+  #v2_query
   v2_tbl <- bigrquery::bq_project_query(project,as.character(v2_query) )
   v2_data <- bigrquery::bq_table_download(v2_tbl,bigint = "integer64")
+  v2_data$version="v2";
 
-  v1_data <- v1_data |> dplyr::select(colnames(v2_data))
-  data <- dplyr::bind_rows(
-    v1_data,
-    v2_data
-  )
-
-  attr(data,"date") <- format(Sys.time(),"%a %b %d %Y %I:%M %p")
-  data
+  v2_data
 }
 
 
@@ -138,7 +165,7 @@ pivotOccupationData<-function(data,...){
   }
 
   levels =c("1","2","3","4","5+")
-  data <- data %>% tidyr::pivot_longer(cols=.data$CurrentJobTitle:.data$LongestSelection,
+  data <- data %>% tidyr::pivot_longer(c(dplyr::starts_with("Current"),dplyr::starts_with("Longest")),
                                        names_to = c("set",".value"),
                                        names_pattern = "(Current|Longest)(.*)") %>%
     dplyr::filter(!is.na(.data$JobTitle)&!is.na(.data$Selection)) %>%

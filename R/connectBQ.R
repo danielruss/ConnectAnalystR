@@ -99,14 +99,18 @@ get_v1_with_date <- function(project,env){
   }
 
   tbl_v1 <- connect_bigquery_info[[env]]$module1_v1
-  v1_query <- glue::glue_data(cid,"select {Connect_ID},",
-                              "{CurrentJobTitle} as CurrentJobTitle, ",
-                              "{CurrentSelection} as CurrentSelection,",
-                              "{LongestJobTitle} as LongestJobTitle,",
-                              "{LongestSelection} as LongestSelection from {tbl_v1} ",
-                              "where Connect_ID is not null AND not",
-                              "({CurrentJobTitle} is null and {CurrentSelection} is null and ",
-                              "{LongestJobTitle} is null and {LongestSelection} is null)")
+  v1_query <- glue::glue_data(cid,"select module1.{Connect_ID},",
+                              "module1.{CurrentJobTitle} as CurrentJobTitle, ",
+                              "module1.{CurrentSelection} as CurrentSelection,",
+                              "module1.{LongestJobTitle} as LongestJobTitle,",
+                              "module1.{LongestSelection} as LongestSelection,",
+                              "participant.{module1_submit_time} as submit_time,",
+                              "from {tbl_v1} as module1 ",
+                              "LEFT JOIN {tbl_participant} AS participant ",
+                              "ON module1.{Connect_ID} = participant.{Connect_ID} ",
+                              "WHERE module1.{Connect_ID} is not null AND not ",
+                              "(module1.{CurrentJobTitle} is null and module1.{CurrentSelection} is null and ",
+                              "module1.{LongestJobTitle} is null and module1.{LongestSelection} is null)")
   v1_tbl <- bigrquery::bq_project_query(project,v1_query)
   v1_data <- bigrquery::bq_table_download(v1_tbl,bigint = "integer64") |>
     dplyr::mutate(CurrentJobTask = NA_character_,
@@ -114,6 +118,7 @@ get_v1_with_date <- function(project,env){
   v1_data$version="v1";
 
   v1_data
+
 
 }
 

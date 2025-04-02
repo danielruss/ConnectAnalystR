@@ -169,18 +169,21 @@ pivotOccupationData<-function(data,...){
     data <- getOccupationData(...)
   }
 
-  levels =c("1","2","3","4","5+")
+  # there are 4 or 6 soc codes depending on the date.
+  levels =c("1","2","3","4","5","6","5+","7+")
   data <- data %>% tidyr::pivot_longer(c(dplyr::starts_with("Current"),dplyr::starts_with("Longest")),
                                        names_to = c("set",".value"),
                                        names_pattern = "(Current|Longest)(.*)") %>%
     dplyr::filter(!is.na(.data$JobTitle)&!is.na(.data$Selection)) %>%
     dplyr::filter(grepl("NONE_OF_THE_ABOVE|\\d{2}-\\d{4}-\\d",.data$Selection))  %>%
     dplyr::mutate(rank = factor(dplyr::case_when(
-      .data$Selection == "NONE_OF_THE_ABOVE" ~ "5+",
+      .data$Selection == "NONE_OF_THE_ABOVE" ~ "7+",
       grepl("-0$",.data$Selection) ~ "1",
       grepl("-1$",.data$Selection) ~ "2",
       grepl("-2$",.data$Selection) ~ "3",
       grepl("-3$",.data$Selection) ~ "4",
+      grepl("-4$",.data$Selection) ~ "5",
+      grepl("-5$",.data$Selection) ~ "6",
     ),levels=levels,ordered = TRUE))
   attr(data,"date") <- format(Sys.time(),"%a %b %d %Y %I:%M %p")
   return(data)

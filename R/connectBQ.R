@@ -81,6 +81,7 @@ getOccupationData <- function(project=preferences$project,env=preferences$env){
 }
 
 get_v1_with_date <- function(project,env){
+  tbl_participant <- connect_bigquery_info[[env]]$participant
   ## the dev data from module 1 is empty
   ## so just return an empty tibble if you are looking
   ## at the dev data.
@@ -177,7 +178,8 @@ pivotOccupationData<-function(data,...){
     dplyr::filter(!is.na(.data$JobTitle)&!is.na(.data$Selection)) %>%
     dplyr::filter(grepl("NONE_OF_THE_ABOVE|\\d{2}-\\d{4}-\\d",.data$Selection))  %>%
     dplyr::mutate(rank = factor(dplyr::case_when(
-      .data$Selection == "NONE_OF_THE_ABOVE" ~ "7+",
+      .data$version=="v1" & .data$Selection == "NONE_OF_THE_ABOVE" ~ "5+",
+      .data$version=="v2" & .data$Selection == "NONE_OF_THE_ABOVE" ~ "7+",
       grepl("-0$",.data$Selection) ~ "1",
       grepl("-1$",.data$Selection) ~ "2",
       grepl("-2$",.data$Selection) ~ "3",
